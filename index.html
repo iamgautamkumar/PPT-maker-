@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Professional PPT Generator - Premium Edition</title>
+    
+    <!-- External CDN Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;600;700&family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- MathJax for rendering math formulas, roots, powers, and brackets -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    
+    <!-- PptxGenJS and html2pdf -->
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+        .slide-aspect-ratio {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Themes */
+        .theme-dark-pro { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #f8fafc; border: 2px solid #334155; }
+        .theme-dark-pro .slide-title { color: #38bdf8; }
+        .theme-dark-pro .slide-subtitle { color: #94a3b8; }
+        .theme-dark-pro .accent-box { background: rgba(56, 189, 248, 0.1); border-left: 4px solid #38bdf8; }
+
+        .theme-black-yellow { background: #09090b; color: #f4f4f5; border: 2px solid #eab308; }
+        .theme-black-yellow .slide-title { color: #facc15; }
+        .theme-black-yellow .slide-subtitle { color: #a1a1aa; }
+        .theme-black-yellow .accent-box { background: rgba(250, 204, 21, 0.1); border-left: 4px solid #facc15; }
+
+        .theme-cyberpunk { background: linear-gradient(135deg, #0d0221 0%, #050515 100%); color: #ffffff; border: 2px solid #ff007f; box-shadow: inset 0 0 15px rgba(255, 0, 127, 0.2); }
+        .theme-cyberpunk .slide-title { color: #00f0ff; text-shadow: 0 0 8px rgba(0,240,255,0.4); }
+        .theme-cyberpunk .slide-subtitle { color: #ff007f; }
+        .theme-cyberpunk .accent-box { background: rgba(255, 0, 127, 0.15); border-left: 4px solid #00f0ff; }
+
+        .theme-gold-executive { background: linear-gradient(135deg, #141414 0%, #2a2518 100%); color: #f3f4f6; border: 2px solid #d97706; }
+        .theme-gold-executive .slide-title { color: #fbbf24; }
+        .theme-gold-executive .slide-subtitle { color: #d1d5db; }
+        .theme-gold-executive .accent-box { background: rgba(251, 191, 36, 0.1); border-left: 4px solid #fbbf24; }
+
+        .theme-midnight-blue { background: linear-gradient(135deg, #0a192f 0%, #112240 100%); color: #e6f1ff; border: 2px solid #64ffda; }
+        .theme-midnight-blue .slide-title { color: #64ffda; }
+        .theme-midnight-blue .slide-subtitle { color: #8892b0; }
+        .theme-midnight-blue .accent-box { background: rgba(100, 255, 218, 0.1); border-left: 4px solid #64ffda; }
+
+        .theme-light-academic { background: #ffffff; color: #1e293b; border: 2px solid #cbd5e1; }
+        .theme-light-academic .slide-title { color: #0284c7; }
+        .theme-light-academic .slide-subtitle { color: #64748b; }
+        .theme-light-academic .accent-box { background: #f0f9ff; border-left: 4px solid #0284c7; }
+
+        .theme-glassmorphism { background: linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.95) 100%); backdrop-filter: blur(10px); color: #ffffff; border: 2px solid rgba(255, 255, 255, 0.1); }
+        .theme-glassmorphism .slide-title { color: #818cf8; }
+        .theme-glassmorphism .slide-subtitle { color: #c7d2fe; }
+        .theme-glassmorphism .accent-box { background: rgba(129, 140, 248, 0.15); border-left: 4px solid #818cf8; }
+
+        .ppt-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9em; }
+        .ppt-table th, .ppt-table td { border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; text-align: left; }
+        .theme-light-academic .ppt-table th, .theme-light-academic .ppt-table td { border: 1px solid #cbd5e1; }
+        .ppt-table th { background: rgba(255, 255, 255, 0.1); font-weight: 700; }
+        .theme-light-academic .ppt-table th { background: #e2e8f0; }
+    </style>
+</head>
+<body class="h-screen flex flex-col bg-slate-950 text-slate-100 antialiased overflow-hidden">
+
+    <!-- Top Header Navigation -->
+    <header class="h-14 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between z-20 flex-shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-amber-500 to-yellow-300 p-2 rounded-lg text-slate-950 font-black text-xl leading-none">
+                <i class="fa-solid fa-file-powerpoint"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base text-slate-100 leading-tight">AI Professional PPT Generator</h1>
+                <p class="text-xs text-amber-400 font-medium">Maths Decode by Gautam - Custom Engine</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button onclick="exportPPTX()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-file-export"></i>
+                <span>Download PPTX</span>
+            </button>
+            <button onclick="exportPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center space-x-2 transition shadow-lg shadow-indigo-600/20">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Download PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Split View Layout -->
+    <main class="flex-1 flex overflow-hidden">
+
+        <!-- LEFT SIDEBAR: Controls & Text Editor -->
+        <section class="w-1/2 flex flex-col border-r border-slate-800 bg-slate-900/50">
+            
+            <!-- Controls Panel -->
+            <div class="p-4 bg-slate-900 border-b border-slate-800 grid grid-cols-2 gap-3 text-xs">
+                
+                <!-- Branding / Header Text Input -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">
+                        <i class="fa-solid fa-heading text-amber-400 mr-1"></i> ऊपर का टेक्स्ट (Header Branding):
+                    </label>
+                    <input type="text" id="brandInput" value="Maths Decode by Gautam" oninput="renderSlides()" 
+                        class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Footer Text Input -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">
+                        <i class="fa-solid fa-shoe-prints text-amber-400 mr-1"></i> नीचे का टेक्स्ट (Footer Text):
+                    </label>
+                    <input type="text" id="footerInput" value="" placeholder="खाली छोड़ने पर खाली रहेगा..." oninput="renderSlides()" 
+                        class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Header Font Family -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">
+                        <i class="fa-solid fa-font text-amber-400 mr-1"></i> हेडर फॉन्ट स्टाइल:
+                    </label>
+                    <select id="brandFontSelect" onchange="renderSlides()" 
+                        class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:outline-none focus:border-amber-500">
+                        <option value="'Poppins', sans-serif">Poppins (Modern)</option>
+                        <option value="'Inter', sans-serif" selected>Inter (Clean)</option>
+                        <option value="'Noto Sans Devanagari', sans-serif">Noto Sans (Hindi)</option>
+                        <option value="'Hind', sans-serif">Hind (Bold)</option>
+                        <option value="'Fira Code', monospace">Fira Code (Code/Math)</option>
+                    </select>
+                </div>
+
+                <!-- Header Font Size & Color -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">फॉन्ट साइज़:</label>
+                        <select id="brandFontSize" onchange="renderSlides()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200">
+                            <option value="10px">10px</option>
+                            <option value="12px" selected>12px</option>
+                            <option value="14px">14px</option>
+                            <option value="16px">16px</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">फॉन्ट कलर:</label>
+                        <input type="color" id="brandFontColor" value="#facc15" onchange="renderSlides()" class="w-full h-8 bg-slate-950 border border-slate-700 rounded cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Theme Selector -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">
+                        <i class="fa-solid fa-palette text-amber-400 mr-1"></i> प्रीमियम थीम:
+                    </label>
+                    <select id="themeSelect" onchange="renderSlides()" 
+                        class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:outline-none focus:border-amber-500">
+                        <option value="theme-black-yellow">1. Black & Yellow Math Special</option>
+                        <option value="theme-dark-pro" selected>2. Dark Professional Blue</option>
+                        <option value="theme-cyberpunk">3. Cyberpunk Neon</option>
+                        <option value="theme-gold-executive">4. Executive Gold Premium</option>
+                        <option value="theme-midnight-blue">5. Midnight Science & Math</option>
+                        <option value="theme-glassmorphism">6. Modern Glassmorphism</option>
+                        <option value="theme-light-academic">7. Light Academic (Clean White)</option>
+                    </select>
+                </div>
+
+                <!-- Content Font Size -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">
+                        <i class="fa-solid fa-text-height text-amber-400 mr-1"></i> बॉडी फॉन्ट साइज़:
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <input type="range" id="fontSizeRange" min="12" max="26" value="16" oninput="renderSlides()" class="w-full accent-amber-500">
+                        <span id="fontSizeValue" class="text-amber-400 font-bold w-6">16px</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ChatGPT Text Input Area -->
+            <div class="flex-1 flex flex-col p-4 overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="font-bold text-sm text-amber-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-paste"></i>
+                        <span>चैटजीपीटी या मैथ नोट्स यहाँ पेस्ट करें:</span>
+                    </label>
+                    <span class="text-xs text-slate-400">Supports Math: $\sqrt{x}$, $x^2$, $\frac{a}{b}$</span>
+                </div>
+                
+                <textarea id="markdownInput" oninput="parseAndGenerateSlides()" 
+                    placeholder="यहाँ ChatGPT से कॉपी किया गया कंटेंट पेस्ट करें..."
+                    class="flex-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 font-mono text-xs leading-relaxed focus:outline-none focus:border-amber-500/50 resize-none"># अध्याय: त्रिकोणमिति और बीजगणित (Trigonometry & Algebra)
+
+## 1. मुख्य समीकरण (Quadratic Formula)
+किसी द्विघात समीकरण के मूल निकालने के लिए निम्नलिखित सूत्र का उपयोग किया जाता है:
+
+> फॉर्मूला: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+
+### महत्वपूर्ण बिंदु:
+- यहाँ $D = b^2 - 4ac$ को विविक्तकर (Discriminant) कहा जाता है।
+- यदि $D > 0$, तो मूल वास्तविक और असमान (Real & Distinct) होते हैं।
+- यदि $D = 0$, तो मूल वास्तविक और समान होते हैं।
+
+## 2. मान सारणी (Trigonometric Values)
+| त्रिकोणमितीय अनुपात | $0^\circ$ | $30^\circ$ | $45^\circ$ | $90^\circ$ |
+|---|---|---|---|---|
+| $\sin \theta$ | $0$ | $\frac{1}{2}$ | $\frac{1}{\sqrt{2}}$ | $1$ |
+| $\cos \theta$ | $1$ | $\frac{\sqrt{3}}{2}$ | $\frac{1}{\sqrt{2}}$ | $0$ |</textarea>
+            </div>
+        </section>
+
+        <!-- RIGHT SIDEBAR: Live Widescreen Preview -->
+        <section class="w-1/2 flex flex-col bg-slate-950 p-6 overflow-y-auto">
+            
+            <div class="flex items-center justify-between mb-4 flex-shrink-0">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="font-bold text-sm text-slate-200">लाइव पीपीटी प्रिव्यू (16:9 Widescreen)</h2>
+                </div>
+                <div class="flex items-center space-x-3 text-xs">
+                    <button onclick="prevSlide()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded transition">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> पिछला
+                    </button>
+                    <span id="slideIndicator" class="font-bold text-amber-400">Slide 1 / 1</span>
+                    <button onclick="nextSlide()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded transition">
+                        अगला <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slide Viewport -->
+            <div class="flex-1 flex items-center justify-center">
+                <div id="slideViewport" class="w-full max-w-2xl slide-aspect-ratio rounded-xl shadow-2xl transition-all duration-300 relative flex flex-col justify-between p-8 theme-dark-pro">
+                    
+                    <!-- Top Branding Bar -->
+                    <div id="topBrandBar" class="flex justify-between items-center border-b border-white/10 pb-2 mb-3">
+                        <span id="topBrandName" class="font-bold uppercase tracking-wider">Maths Decode by Gautam</span>
+                    </div>
+
+                    <!-- Slide Content Container -->
+                    <div id="slideContent" class="flex-1 flex flex-col justify-center space-y-3 overflow-hidden"></div>
+
+                    <!-- Bottom Footer Bar -->
+                    <div id="bottomFooterBar" class="flex justify-between items-center border-t border-white/10 pt-2 mt-3 text-xs opacity-75">
+                        <span id="footerBrandName"></span>
+                        <span id="footerSlideNum" class="font-bold"></span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Slide Thumbnails Bar -->
+            <div class="mt-6 flex flex-col flex-shrink-0">
+                <span class="text-xs font-semibold text-slate-400 mb-2">स्लाइड्स थंबनेल सूची:</span>
+                <div id="thumbnailsContainer" class="flex space-x-3 overflow-x-auto pb-2"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script Engine -->
+    <script>
+        let slidesData = [];
+        let currentSlideIndex = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            parseAndGenerateSlides();
+        });
+
+        function parseAndGenerateSlides() {
+            const rawText = document.getElementById('markdownInput').value.trim();
+            if (!rawText) {
+                slidesData = [{ title: "शीर्षक अनुपलब्ध", subtitle: "", content: ["<p>कोई कंटेंट दर्ज नहीं है...</p>"] }];
+                renderSlides();
+                return;
+            }
+
+            slidesData = [];
+            const lines = rawText.split('\n');
+            let currentSlide = { title: "", subtitle: "", content: [] };
+            let inTable = false;
+            let tableBuffer = [];
+
+            lines.forEach((line) => {
+                const trimmed = line.trim();
+
+                if (trimmed.startsWith('# ')) {
+                    if (currentSlide.title || currentSlide.content.length > 0) slidesData.push(currentSlide);
+                    currentSlide = { title: trimmed.replace('# ', ''), subtitle: 'मुख्य विषय', content: [] };
+                } else if (trimmed.startsWith('## ')) {
+                    if (currentSlide.title || currentSlide.content.length > 0) slidesData.push(currentSlide);
+                    currentSlide = { title: trimmed.replace('## ', ''), subtitle: '', content: [] };
+                } else if (trimmed.startsWith('### ')) {
+                    currentSlide.content.push(`<h4 class="font-bold text-amber-400 mt-2 text-sm">${trimmed.replace('### ', '')}</h4>`);
+                } else if (trimmed.startsWith('|')) {
+                    if (!inTable) { inTable = true; tableBuffer = []; }
+                    tableBuffer.push(trimmed);
+                } else {
+                    if (inTable) {
+                        currentSlide.content.push(formatMarkdownTable(tableBuffer));
+                        inTable = false;
+                        tableBuffer = [];
+                    }
+
+                    if (trimmed === '') return;
+
+                    if (trimmed.startsWith('> ')) {
+                        currentSlide.content.push(`<div class="accent-box p-3 rounded-r-lg my-2 font-medium text-xs">${formatInlineMarkdown(trimmed.replace('> ', ''))}</div>`);
+                    } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                        currentSlide.content.push(`<div class="flex items-start space-x-2 my-1 text-xs"><span class="text-amber-400 font-bold">•</span><span>${formatInlineMarkdown(trimmed.substring(2))}</span></div>`);
+                    } else if (/^\d+\.\s/.test(trimmed)) {
+                        const num = trimmed.match(/^\d+/)[0];
+                        const text = trimmed.replace(/^\d+\.\s/, '');
+                        currentSlide.content.push(`<div class="flex items-start space-x-2 my-1 text-xs"><span class="text-amber-400 font-bold">${num}.</span><span>${formatInlineMarkdown(text)}</span></div>`);
+                    } else {
+                        currentSlide.content.push(`<p class="my-1 text-xs">${formatInlineMarkdown(trimmed)}</p>`);
+                    }
+                }
+            });
+
+            if (inTable && tableBuffer.length > 0) currentSlide.content.push(formatMarkdownTable(tableBuffer));
+            if (currentSlide.title || currentSlide.content.length > 0) slidesData.push(currentSlide);
+
+            if (slidesData.length === 0) {
+                slidesData.push({ title: "Presentation", subtitle: "", content: ["<p>सामग्री तैयार है।</p>"] });
+            }
+
+            currentSlideIndex = 0;
+            renderSlides();
+        }
+
+        function formatInlineMarkdown(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-amber-300">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+                .replace(/`([^`]+)`/g, '<code class="bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded font-mono">$1</code>');
+        }
+
+        function formatMarkdownTable(rows) {
+            if (rows.length < 2) return '';
+            let html = '<table class="ppt-table my-2">';
+            rows.forEach((row, index) => {
+                if (row.includes('---')) return;
+                const cells = row.split('|').filter((cell, i, arr) => i > 0 && i < arr.length - 1);
+                const tag = index === 0 ? 'th' : 'td';
+                html += '<tr>';
+                cells.forEach(cell => { html += `<${tag}>${formatInlineMarkdown(cell.trim())}</${tag}>`; });
+                html += '</tr>';
+            });
+            html += '</table>';
+            return html;
+        }
+
+        function renderSlides() {
+            if (slidesData.length === 0) return;
+
+            const theme = document.getElementById('themeSelect').value;
+            const brandText = document.getElementById('brandInput').value;
+            const footerText = document.getElementById('footerInput').value;
+            const brandFont = document.getElementById('brandFontSelect').value;
+            const brandSize = document.getElementById('brandFontSize').value;
+            const brandColor = document.getElementById('brandFontColor').value;
+            const fontSize = document.getElementById('fontSizeRange').value;
+
+            document.getElementById('fontSizeValue').innerText = fontSize + 'px';
+
+            // Top Header Customization
+            const topBar = document.getElementById('topBrandBar');
+            const topBrandName = document.getElementById('topBrandName');
+            if (brandText.trim() === '') {
+                topBar.style.display = 'none';
+            } else {
+                topBar.style.display = 'flex';
+                topBrandName.innerText = brandText;
+                topBrandName.style.fontFamily = brandFont;
+                topBrandName.style.fontSize = brandSize;
+                topBrandName.style.color = brandColor;
+            }
+
+            // Bottom Footer Customization
+            const footerBar = document.getElementById('bottomFooterBar');
+            const footerBrandName = document.getElementById('footerBrandName');
+            const footerSlideNum = document.getElementById('footerSlideNum');
+            if (footerText.trim() === '') {
+                footerBar.style.display = 'none';
+            } else {
+                footerBar.style.display = 'flex';
+                footerBrandName.innerText = footerText;
+                footerSlideNum.innerText = `Slide ${currentSlideIndex + 1} / ${slidesData.length}`;
+            }
+
+            // Theme Viewport
+            const viewport = document.getElementById('slideViewport');
+            viewport.className = `w-full max-w-2xl slide-aspect-ratio rounded-xl shadow-2xl transition-all duration-300 relative flex flex-col justify-between p-8 ${theme}`;
+
+            // Content rendering
+            const slide = slidesData[currentSlideIndex];
+            const contentContainer = document.getElementById('slideContent');
+            contentContainer.style.fontSize = `${fontSize}px`;
+
+            let htmlHtml = '';
+            if (slide.title) {
+                htmlHtml += `<h2 class="slide-title font-extrabold text-xl mb-1">${formatInlineMarkdown(slide.title)}</h2>`;
+            }
+            if (slide.subtitle) {
+                htmlHtml += `<p class="slide-subtitle text-xs font-semibold mb-3">${formatInlineMarkdown(slide.subtitle)}</p>`;
+            }
+
+            htmlHtml += `<div class="space-y-1.5 flex-1 overflow-y-auto">${slide.content.join('')}</div>`;
+            contentContainer.innerHTML = htmlHtml;
+
+            document.getElementById('slideIndicator').innerText = `Slide ${currentSlideIndex + 1} / ${slidesData.length}`;
+            renderThumbnails();
+
+            // Trigger MathJax formula rendering
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([contentContainer]).catch((err) => console.log('MathJax error:', err));
+            }
+        }
+
+        function renderThumbnails() {
+            const container = document.getElementById('thumbnailsContainer');
+            container.innerHTML = '';
+            slidesData.forEach((slide, idx) => {
+                const isActive = idx === currentSlideIndex;
+                const thumb = document.createElement('div');
+                thumb.className = `flex-shrink-0 w-28 h-16 rounded border-2 p-2 cursor-pointer transition flex flex-col justify-between text-[8px] overflow-hidden ${
+                    isActive ? 'border-amber-400 bg-slate-800' : 'border-slate-800 bg-slate-900 opacity-60 hover:opacity-100'
+                }`;
+                thumb.onclick = () => { currentSlideIndex = idx; renderSlides(); };
+                thumb.innerHTML = `
+                    <span class="font-bold truncate text-amber-300">${slide.title || 'Slide ' + (idx + 1)}</span>
+                    <span class="text-[7px] text-slate-400 truncate">${slide.content.length} Items</span>
+                    <span class="text-[7px] text-right font-bold text-slate-500">${idx + 1}</span>
+                `;
+                container.appendChild(thumb);
+            });
+        }
+
+        function prevSlide() { if (currentSlideIndex > 0) { currentSlideIndex--; renderSlides(); } }
+        function nextSlide() { if (currentSlideIndex < slidesData.length - 1) { currentSlideIndex++; renderSlides(); } }
+
+        function exportPPTX() {
+            const pptx = new PptxGenJS();
+            pptx.layout = 'LAYOUT_16x9';
+            const brand = document.getElementById('brandInput').value.trim();
+
+            slidesData.forEach((slideData, idx) => {
+                const slide = pptx.addSlide();
+                slide.background = { color: '0F172A' };
+
+                if (brand) {
+                    slide.addText(brand.toUpperCase(), { x: 0.5, y: 0.3, w: 9.0, h: 0.3, fontSize: 10, color: 'FACC15', bold: true });
+                }
+
+                slide.addText(slideData.title || 'Slide ' + (idx + 1), { x: 0.5, y: 0.7, w: 9.0, h: 0.8, fontSize: 22, color: '38BDF8', bold: true });
+
+                const plainContent = slideData.content.map(html => {
+                    const tmp = document.createElement('DIV');
+                    tmp.innerHTML = html;
+                    return tmp.textContent || tmp.innerText || '';
+                }).join('\n');
+
+                slide.addText(plainContent, { x: 0.5, y: 1.6, w: 9.0, h: 4.8, fontSize: 13, color: 'F8FAFC', lineSpacing: 20 });
+            });
+
+            pptx.writeFile({ fileName: `Presentation.pptx` });
+        }
+
+        function exportPDF() {
+            const viewport = document.getElementById('slideViewport');
+            const opt = {
+                margin: 0,
+                filename: `Presentation.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(viewport).save();
+        }
+    </script>
+</body>
+</html>
